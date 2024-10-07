@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- displays site properly based on user's device -->
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/images/favicon-32x32.png"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <title>Frontend Mentor | Mortgage repayment calculator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="left-container">
+        <div class="heading">
+          <h3>Mortgage Calculator</h3>
+          <button class="clear">Clear All</button>
+        </div>
+
+        <div class="amount">
+          <label>Mortgage Amount</label>
+          <div class="with-euro">
+            <span> <i class="fa-solid fa-euro-sign"></i></span>
+            <input type="number" id="mortgageAmount" />
+          </div>
+        </div>
+
+        <div class="term-rate">
+          <div class="term">
+            <label>Mortgage Term</label>
+            <div
+              style="
+                display: flex;
+                border: 1px solid black;
+                height: 40px;
+                align-items: center;
+                border-radius: 6px;
+              "
+            >
+              <input
+                type="number"
+                id="mortgageTerm"
+                style="border-radius: 6px 0 0 6px"
+              />
+              <i style="border-radius: 0 6px 6px 0">years</i>
+            </div>
+          </div>
+          <div class="rate">
+            <label> Interest Rate </label>
+            <div
+              style="
+                display: flex;
+                border: 1px solid black;
+                height: 40px;
+                align-items: center;
+                border-radius: 6px;
+              "
+            >
+              <input
+                type="number"
+                id="interestRate"
+                style="border-radius: 6px 0 0 6px"
+              />
+              <i
+                class="fa-thin fa-percent"
+                style="border-radius: 0 6px 6px 0"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div class="type">
+          <label>Mortgage Type</label>
+          <div>
+            <input type="radio" id="repayment" />
+            <p>Repayment</p>
+          </div>
+          <div>
+            <input type="radio" id="interestOnly" />
+            <p>Interest Only</p>
+          </div>
+        </div>
+        <div class="button">
+          <img src="./assets/images/icon-calculator.svg" style="height: 20px" />
+          <button id="calculateBtn">Calculate Repayments</button>
+        </div>
+      </div>
+      <div class="right-container">
+        <!-- Empty results start -->
+
+        <div class="emptyResult" id="empty">
+          <img src="./assets/images/illustration-empty.svg" alt="" />
+          <h3>Results shown here</h3>
+          <p>
+            Complete the form and click “calculate repayments” to see what your
+            monthly repayments would be.
+          </p>
+        </div>
+
+        <!-- Empty results end -->
+
+        <!-- Completed results start -->
+
+        <div id="fullfill">
+          <div class="completedResult">
+            <h3>Your results</h3>
+            <p>
+              Your results are shown below based on the information you
+              provided. To adjust the results, edit the form and click
+              “calculate repayments” again.
+            </p>
+          </div>
+          <div class="result">
+            <p class="first">Your monthly repayments:</p>
+            <span id="monthlyRepayment"></span>
+            <hr />
+            <p class="second">Total you'll repay over the term:</p>
+            <span id="totalRepayment"></span>
+          </div>
+        </div>
+        <!-- Completed results end -->
+      </div>
+    </div>
+    <script>
+      const divs = document.querySelectorAll(".type div");
+      const radios = document.querySelectorAll('input[type="radio"]');
+      const clearAll = document.querySelector(".left-container .clear");
+      const inputs = document.querySelectorAll(
+        "input[type='text'], input[type='number']"
+      );
+      const calculateBtn = document.getElementById("calculateBtn");
+      const monthlyRepaymentEl = document.getElementById("monthlyRepayment");
+      const totalRepaymentEl = document.getElementById("totalRepayment");
+      const completedResult = document.querySelector("#fullfill");
+      const emptyResult = document.querySelector(".emptyResult");
+      completedResult.style.display = "none";
+
+      clearAll.addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default behavior
+        inputs.forEach((input) => {
+          input.value = "";
+          if (input.type === "radio") {
+            input.checked = false; // Reset radio buttons
+          }
+        });
+        divs.forEach((d) => d.classList.remove("selected")); // Remove selected class from divs
+        emptyResult.style.display = "block";
+      });
+
+      divs.forEach((div) => {
+        div.addEventListener("click", function () {
+          divs.forEach((d) => d.classList.remove("selected"));
+          radios.forEach((radio) => (radio.checked = false));
+
+          this.classList.add("selected");
+
+          const radio = this.querySelector('input[type="radio"]');
+          radio.style.accentColor = "hsl(61, 70%, 52%)";
+          radio.checked = true;
+        });
+      });
+
+      calculateBtn.addEventListener("click", function () {
+        const mortgageAmount = parseFloat(
+          document.getElementById("mortgageAmount").value
+        );
+        const interestRate =
+          parseFloat(document.getElementById("interestRate").value) / 100 / 12; // Convert annual to monthly
+        const mortgageTerm =
+          parseFloat(document.getElementById("mortgageTerm").value) * 12; // Convert years to months
+
+        if (
+          isNaN(mortgageAmount) ||
+          isNaN(interestRate) ||
+          isNaN(mortgageTerm)
+        ) {
+          alert("Please fill in all fields with valid numbers.");
+          return;
+        }
+
+        // Calculate monthly repayment
+        const monthlyRepayment =
+          (mortgageAmount *
+            interestRate *
+            Math.pow(1 + interestRate, mortgageTerm)) /
+          (Math.pow(1 + interestRate, mortgageTerm) - 1);
+        const totalRepayment = monthlyRepayment * mortgageTerm;
+
+        monthlyRepaymentEl.textContent = `€${monthlyRepayment.toFixed(2)}`; // Format the output
+        totalRepaymentEl.textContent = `€${totalRepayment.toFixed(2)}`; // Format the output
+        completedResult.style.display = "block";
+        emptyResult.style.display = "none";
+      });
+    </script>
+  </body>
+</html>
